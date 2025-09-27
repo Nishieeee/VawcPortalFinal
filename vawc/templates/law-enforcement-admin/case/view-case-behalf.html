@@ -3172,7 +3172,7 @@
             && !$('#enforce_protect_order').is(':checked')
             && !$('#law_enforcement_others').is(':checked')
             ){
-                $('#errorToast .toast-body').text('Check Atleast 1 Refferal Action.');
+                $('#errorToast .toast-body').text('Check Atleast 1 Referral Action.');
                 $('#errorToast').toast('show');
                 
                 $('#referral_actions .text-danger').remove();
@@ -3200,8 +3200,8 @@
 
                          const now = new Date();
                         if($('#btn-save-service').text() == 'Update'){
-                            statusTitle = ' Law Enforcement Updates Refferal';
-                            statusText = 'Law Enforcement have taken action for the refferal.';
+                            statusTitle = ' Law Enforcement Updates Referral';
+                            statusText = 'Law Enforcement have taken action for the referral.';
                             successMessage = 'Law Enforcement updated response successfully.';
                         }else{
                             statusTitle = 'Law Enforcement have Respond.';

@@ -3181,7 +3181,7 @@
             && !$('#economic_assist').is(':checked')
             && !$('#SWDO_other').is(':checked')
             ){
-                $('#errorToast .toast-body').text('Check Atleast 1 Refferal Action.');
+                $('#errorToast .toast-body').text('Check Atleast 1 Referral Action.');
                 $('#errorToast').toast('show');
                 
                 $('#referral_actions .text-danger').remove();
@@ -3209,8 +3209,8 @@
                     success: function(response) {
                         const now = new Date();
                         if($('#btn-send-SWDO').text() == 'Update'){
-                            statusTitle = ' SWDO Updates Refferal';
-                            statusText = 'SWDO have taken action for the refferal.';
+                            statusTitle = ' SWDO Updates Referral';
+                            statusText = 'SWDO have taken action for the referral.';
                             successMessage = 'SWDO updated response successfully.';
                         }else{
                             statusTitle = 'SWDO have Respond.';

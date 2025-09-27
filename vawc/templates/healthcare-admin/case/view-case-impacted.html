@@ -2643,7 +2643,7 @@
             && !$('#medico_legal').is(':checked')
             && !$('#healthcare_other').is(':checked')
             ){
-                $('#errorToast .toast-body').text('Check Atleast 1 Refferal Action.');
+                $('#errorToast .toast-body').text('Check Atleast 1 Referral Action.');
                 $('#errorToast').toast('show');
                 
                 $('#referral_actions .text-danger').remove();
@@ -2670,8 +2670,8 @@
                     success: function(response) {
                          const now = new Date();
                         if($('#btn-save-service').text() == 'Update'){
-                            statusTitle = ' Healthcare Updates Refferal';
-                            statusText = 'Healthcare have taken action for the refferal.';
+                            statusTitle = ' Healthcare Updates Referral';
+                            statusText = 'Healthcare have taken action for the Referral.';
                             successMessage = 'Healthcare updated response successfully.';
                         }else{
                             statusTitle = 'Healthcare have Respond.';
