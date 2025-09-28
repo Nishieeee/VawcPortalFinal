@@ -38,6 +38,9 @@
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Email</th>
+                    <th scope="col">Region</th>
+                    <th scope="col">Province</th>
+                    <th scope="col">City</th>
                     <th scope="col">Status</th>
                     <th scope="col">Date Added</th>
                     <th class="text-center" scope="col">Manage</th>
@@ -48,6 +51,9 @@
                     <tr>
                         <td>{{ account.name }}</td>
                         <td>{{ account.user.email }}</td>
+                        <td>{{ account.region }}</td>
+                        <td>{{ account.province }}</td>
+                        <td>{{ account.city }}</td>
                         <td>{{ account.status }}</td>
                         <td>{{ account.user.date_joined }}</td>
                         <td class="text-center">
@@ -111,6 +117,9 @@
                     <div id="account_emailFeedback" class="invalid-feedback">
                         Email is already Taken.
                     </div>
+                    <div id="account_emailFeedback2" class="invalid-feedback">
+                        Invalid email format.
+                    </div>
                     <div class="valid-feedback">
                         Looks good!
                     </div>
@@ -119,7 +128,36 @@
                     <input type="text" class="form-control" id="account_fname" name="account_fname" placeholder="name@example.com" >
                     <label for="account_fname">Name</label>
                 </div>
-               
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="region" name="region">
+                        <option>--Select Option--</option>
+                        {% for region in default_regions %}
+                            <option value="{{ region.name }}" data-code="{{ region.code }}">{{ region.name }}</option>
+                        {% empty %}
+                            <option>No data found</option>
+                        {% endfor %}
+                    </select>
+                    <label for="victim_region">Region</label>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="province" name="province" disabled>
+                        <option value="">--Select Option--</option>
+                    </select>
+                    <label for="province">Province</label>
+                </div>  
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="city" name="city" placeholder="Input City" disabled>
+                    <label for="city">City</label>
+                    <div id="account_cityFeedback" class="invalid-feedback">
+                        City already have an account.
+                    </div>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                </div>
 
             </form>
         </div>
@@ -157,6 +195,31 @@
                         <option value="Not Active">Not Active</option>
                     </select>
                     <label for="edit_status">Status</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="edit_region" name="edit_region">
+                        <option>--Select Option--</option>
+                    </select>
+                    <label for="edit_region">Region</label>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="edit_province" name="edit_province">
+                        <option>--Select Option--</option>
+                    </select>
+                    <label for="edit_province">Province</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="edit_city" name="edit_city" placeholder="Input City">
+                    <label for="edit_city">City</label>
+                    <div id="account_cityFeedback" class="invalid-feedback">
+                        City already have an account.
+                    </div>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
                 </div>
               
             </form>
@@ -216,6 +279,7 @@
         // Function to handle form submission
         $('#addAccountForm').submit(function(event) {
             event.preventDefault(); // Prevent default form submission
+            
             $('#addAccountBtn').prop('disabled', true); // Disable the button to prevent multiple submissions
             $.ajax({
                 url: '{% url "create SWDO account" %}',
@@ -256,6 +320,16 @@
                     $('#account_id').val(response.account_id);
                     $('#edit_account_fname').val(response.name);
                     $('#edit_status').val(response.status);
+                    // Populate regions first
+                    populateRegions('#edit_region', response.region);
+                    if(response.region) {
+                        setTimeout(() => {
+                            populateProvinces('#edit_province', response.region, response.province);
+                        }, 500);
+                    }
+                    // Set city value
+                    $('#edit_city').val(response.city);
+            
                     // Show the modal
                     $('#edit_law_enforcement_account').modal('show');
                 },
@@ -360,60 +434,357 @@
         $('#account_username, #account_email').on('blur', function() {
             var username = $('#account_username').val();
             var email = $('#account_email').val();
-        
-            $.ajax({
-                type: 'GET',
-                url: '/check_username_email/',
-                data: {
-                    'username': username,
-                    'email': email
-                },
-                success: function(response) {
-                    if (response.username_taken) {
-                        $('#account_username').addClass('is-invalid');
-                        $('#account_username').removeClass('is-valid'); // Remove is-valid class
-                        $('#account_usernameFeedback').show();
-                        $('#account_usernameFeedback.valid-feedback').hide(); // Hide valid feedback
-                    } else {
-                        $('#account_username').removeClass('is-invalid');
-                        $('#account_username').addClass('is-valid'); // Add is-valid class
-                        $('#account_usernameFeedback').hide();
-                        $('#account_usernameFeedback.valid-feedback').show(); // Show valid feedback
-                    }
-        
-                    if (response.email_taken) {
-                        $('#account_email').addClass('is-invalid');
-                        $('#account_email').removeClass('is-valid'); // Remove is-valid class
-                        $('#account_emailFeedback').show();
-                        $('#account_emailFeedback.valid-feedback').hide(); // Hide valid feedback
-                    } else {
-                        $('#account_email').removeClass('is-invalid');
-                        $('#account_email').addClass('is-valid'); // Add is-valid class
-                        $('#account_emailFeedback').hide();
-                        $('#account_emailFeedback.valid-feedback').show(); // Show valid feedback
-                    }
-        
-                    // Check if both username and email are valid
-                    if (!$('#account_username').hasClass('is-invalid') && !$('#account_email').hasClass('is-invalid')) {
-                        $('#addAccountBtn').removeAttr('disabled'); // Remove disabled attribute
-                    } else {
-                        $('#addAccountBtn').attr('disabled', 'disabled'); // Add disabled attribute
-                    }
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (username && email) {
+
+                if(!emailPattern.test(email)){
+                    //check if email is valid format
+                    
+                    $('#account_email').addClass('is-invalid');
+                    $('#account_email').removeClass('is-valid'); // Remove is-valid class
+                    $('#account_emailFeedback2').show();
+                    $('#account_emailFeedback.valid-feedback').hide(); // Hide valid feedback
+                    $('#account_emailFeedback').hide();
+                
+                }else{
+                    $.ajax({
+                    type: 'GET',
+                    url: '/check_username_email/',
+                    data: {
+                        'username': username,
+                        'email': email
+                    },
+                        success: function(response) {
+                            if (response.username_taken) {
+                                $('#account_username').addClass('is-invalid');
+                                $('#account_username').removeClass('is-valid'); // Remove is-valid class
+                                $('#account_usernameFeedback').show();
+                                $('#account_usernameFeedback.valid-feedback').hide(); // Hide valid feedback
+                            } else {
+                                $('#account_username').removeClass('is-invalid');
+                                $('#account_username').addClass('is-valid'); // Add is-valid class
+                                $('#account_usernameFeedback').hide();
+                                $('#account_usernameFeedback.valid-feedback').show(); // Show valid feedback
+                            }
+                
+                            if (response.email_taken) {
+                                $('#account_email').addClass('is-invalid');
+                                $('#account_email').removeClass('is-valid'); // Remove is-valid class
+                                $('#account_emailFeedback').show();
+                                $('#account_emailFeedback.valid-feedback').hide(); // Hide valid feedback
+                            } else {
+                                $('#account_email').removeClass('is-invalid');
+                                $('#account_email').addClass('is-valid'); // Add is-valid class
+                                $('#account_emailFeedback').hide();
+                                $('#account_emailFeedback.valid-feedback').show(); // Show valid feedback
+                            }
+                
+                            // Check if both username and email are valid
+                            if (!$('#account_username').hasClass('is-invalid') && !$('#account_email').hasClass('is-invalid')) {
+                                $('#addAccountBtn').removeAttr('disabled'); // Remove disabled attribute
+                            } else {
+                                $('#addAccountBtn').attr('disabled', 'disabled'); // Add disabled attribute
+                            }
+                        }
+                    });
                 }
-            });
+                
+            }
+            
+            
         });
 
     });
 
+    //==
+
+    function addAddressListener(formElement, formType, count = 0) {
+        let region = null
+        let province = null
+        let city = null
+
+        region = formElement.querySelector(`#region`)
+        province = formElement.querySelector(`#province`)
+        city = $(formElement).find(`#city`)
     
-    {% comment %} document.addEventListener('DOMContentLoaded', () => {
+        province.disabled = true
+        city.prop('disabled', true)
+
+        region.addEventListener('change', (e) => {
+            console.log("region changed")
+            const regionSelect = formElement.querySelector(`#region`);
+            const regionNameRaw = regionSelect.value;
+            const regionName = regionNameRaw.replace(/\s*\(.*?\)\s*/g, '').trim();
+            if(regionName) {
+                setGeoSelectPoliceStation(province, {
+                    region: regionName,
+                    action: 'province',
+                    csrfmiddlewaretoken: csrf_token,
+                });
+                province.disabled=false
+                console.log("enabled province")
+            } else {
+                console.log('Please select a region.');
+            }
+        })
+
+        province.addEventListener('change', (e) => {
+            const provinceName = e.target.value;
+            if (provinceName) {
+                
+                city.prop('disabled', false)
+                console.log("enabled city")
+                
+            } else {
+                console.log('Please select a province.');
+            }
+        });
+
+        city.on('blur input keyup paste', function() {
+            const cityName = city.val().trim();
+            console.log("city input changed: ", cityName);
+            if(cityName){
+                city_have_an_acc = is_city_have_an_account(cityName)
+                console.log(city_have_an_acc)
+                if(city_have_an_acc){
+                    console.log("city has an account")
+                    city.addClass('is-invalid');
+                    city.removeClass('is-valid');
+                    $('#account_cityFeedback').show();
+                    $('#account_cityFeedback.valid-feedback').hide();
+                    $('#addAccountBtn').attr('disabled', 'disabled');
+                }else{
+                    console.log("city do not have an account")
+                    city.removeClass('is-invalid');
+                    city.addClass('is-valid');
+                    $('#account_cityFeedback').hide();
+                    $('#account_cityFeedback.valid-feedback').show();
+                    if (!$('#account_username').hasClass('is-invalid') && !$('#account_email').hasClass('is-invalid')) {
+                        $('#addAccountBtn').removeAttr('disabled');
+                    }
+                }
+            } else {
+                // Clear validation when input is empty
+                city.removeClass('is-invalid is-valid');
+                $('#account_cityFeedback').hide();
+                $('#account_cityFeedback.valid-feedback').hide();
+            }
+        });
+
+    }
+    
+    function editAddressListener(formElement, formType, count = 0) {
+        let region = formElement.querySelector(`#edit_region`)
+        let province = formElement.querySelector(`#edit_province`)
+        city = $(formElement).find(`#edit_city`)
+
+        if(region){
+            region.addEventListener('change', (e) => {
+                const regionName = e.target.value;
+                if(regionName) {
+                    setGeoSelectPoliceStation(province, {
+                        region: regionName,
+                        action: 'province',
+                        csrfmiddlewaretoken: csrf_token,
+                    });
+                    province.disabled = false;
+                } else {
+                    console.log('Please select a region.');
+                }
+            })
+        }
+
+        if(province){
+            province.addEventListener('change', (e) => {
+                const provinceName = e.target.value;
+                if (provinceName) {
+                    $(city).prop('disabled', false);
+                    console.log("enabled city")
+                } else {
+                    console.log('Please select a province.');
+                }
+            });
+        }
+
+        city.on('blur input keyup paste', function() {
+            const cityName = city.val().trim();
+            console.log("city input changed: ", cityName);
+            if(cityName){
+                city_have_an_acc = is_city_have_an_account(cityName)
+                console.log(city_have_an_acc)
+                if(city_have_an_acc){
+                    console.log("city has an account")
+                    city.addClass('is-invalid');
+                    city.removeClass('is-valid');
+                    $('#account_cityFeedback').show();
+                    $('#account_cityFeedback.valid-feedback').hide();
+                    $('#saveAccountBtn').attr('disabled', 'disabled');
+                }else{
+                    console.log("city do not have an account")
+                    city.removeClass('is-invalid');
+                    city.addClass('is-valid');
+                    $('#account_cityFeedback').hide();
+                    $('#account_cityFeedback.valid-feedback').show();
+                    $('#saveAccountBtn').removeAttr('disabled');
+                }
+            } else {
+                // Clear validation when input is empty
+                city.removeClass('is-invalid is-valid');
+                $('#account_cityFeedback').hide();
+                $('#account_cityFeedback.valid-feedback').hide();
+            }
+        });
+
+    }
+
+    //==
+    document.addEventListener('DOMContentLoaded', () => {
         addAddressListener(document.querySelector('#addAccountForm'), 'account')
         editAddressListener(document.querySelector('#editAccountForm'), 'edit_account')
     })
-     {% endcomment %}
     
+    function is_city_have_an_account(city){
+        let has_account = false;
+        $.ajax({
+            url: '{% url "acc city" %}',
+            method: 'GET',
+            async: false, // Make the request synchronous
+            data: {
+                'city': city
+            },
+            success: function(response) {
+                has_account = response.city_taken;
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+        return has_account;
+    }
+    async function setGeoSelectPoliceStation(selectElement, formData) {
+        try {
+            const res = await fetch('/pages/get-police-station/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrf_token
+                },
+                body: new URLSearchParams(formData)
+            });
 
-    
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+            const data = await res.json();
+
+            selectElement.innerHTML = '';
+            const blankOption = document.createElement('option');
+            blankOption.textContent = '--Select Option--';
+            blankOption.value = '';
+            selectElement.appendChild(blankOption);
+
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.textContent = item.name;
+                selectElement.appendChild(option);
+                console.log(item.name);
+            });
+        } catch (error) {
+            console.error("Failed to fetch Province:", error);
+        }
+    }
+
+    async function setGeoSelect(geoTypeInput, formData) {
+
+        const res = await fetch('/pages/select-address/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token
+            },
+            body: JSON.stringify(formData),
+        })
+
+        const data = await res.json()
+
+        const blankOption = document.createElement('option')
+        blankOption.textContent = '--Select Option--'
+        blankOption.value = ''
+        // clear all options in select element
+        geoTypeInput.replaceChildren()
+
+        // apend blank option as the first selected options
+        geoTypeInput.appendChild(blankOption)
+        // apped data to respective inputs
+        data.forEach(item => {
+            const option = document.createElement('option')
+            option.dataset.code = item.code
+            option.value = item.name
+            option.textContent = item.name
+            geoTypeInput.appendChild(option)
+        })
+    }
+    async function setGeoSelectForEdit(selectElement, formData, selectedValue = '') {
+        try {
+            const res = await fetch('/pages/get-police-station/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrf_token
+                },
+                body: new URLSearchParams(formData)
+            });
+
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+            const data = await res.json();
+
+            selectElement.innerHTML = '';
+            const blankOption = document.createElement('option');
+            blankOption.textContent = '--Select Option--';
+            blankOption.value = '';
+            selectElement.appendChild(blankOption);
+
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.textContent = item.name;
+                if (item.name === selectedValue) {
+                    option.selected = true;
+                }
+                selectElement.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        }
+    }
+
+    function populateRegions(selectId, selectedValue = '') {
+        // You can either fetch regions dynamically or use the default regions
+        $(selectId).empty();
+        $(selectId).append('<option value="">--Select Option--</option>');
+        
+        // Add your regions here (you might want to fetch this from the backend)
+        {% for region in default_regions %}
+            var selected = '{{ region.name }}' === selectedValue ? 'selected' : '';
+            $(selectId).append(`<option value="{{ region.name }}" ${selected}>{{ region.name }}</option>`);
+        {% endfor %}
+    }
+
+    function populateProvinces(selectId, regionName, selectedValue = '') {
+        if (!regionName) return;
+        
+        // Clear provinces
+        $(selectId).empty();
+        $(selectId).append('<option value="">--Select Option--</option>');
+        
+        // Fetch provinces for the selected region
+        setGeoSelectForEdit(document.querySelector(selectId), {
+            region: regionName,
+            action: 'province',
+            csrfmiddlewaretoken: csrf_token,
+        }, selectedValue);
+    }
+
 
 </script>
 {% endblock scripts %}

@@ -632,9 +632,23 @@ def swdo_manage_account_view(request):
     users = CustomUser.objects.exclude(email__in=excluded_emails)
     accounts = SWDOaccount.objects.filter(user__in=users)
 
+    # Default/initial data to use when page loads
+    region_id = 10  # Region 9
+    province_id = 50  # Zamboanga del Sur
+    municipality_id = 1133  # Zamboanga City
+    
+    regions = Region.objects.filter(id=region_id).values('id', 'code', 'name')
+
+    # Strip names like 'REGION IX (ZAMBOANGA PENINSULA)' → 'REGION IX'
+    for r in regions:
+        if '(' in r['name']:
+            r['name'] = r['name'].split('(')[0].strip()
+
     return render(request, 'super-admin/SWDO-account.html', {
         'users': users,
         'accounts': accounts,
+        'default_regions': regions,
+        'default_provinces': Province.objects.filter(region_id=region_id),
     })
 
 
@@ -645,8 +659,11 @@ def create_swdo_manage_account(request):
             username = request.POST.get('account_username')
             email = request.POST.get('account_email')
             name = request.POST.get('account_fname')
+            region = request.POST.get('region')
+            province = request.POST.get('province')
+            city = request.POST.get('city')
             
-            print(username, email, name)
+            print(username, email, name,region,province,city)
             
             try:
                 password = generate_random_password()
@@ -657,6 +674,9 @@ def create_swdo_manage_account(request):
                     f'Account Details\n'
                     f'--------------------------\n\n'
                     f'Here is your New Account From VAWC:\n\n'
+                    f'Region:  {region}\n'
+                    f'Province:  {province}\n'
+                    f'City:  {city}\n'
                     f'Email:  {email}\n'
                     f'Username:  {username}\n'
                     f'Password:  {password}\n\n'
@@ -670,6 +690,9 @@ def create_swdo_manage_account(request):
                 account = SWDOaccount.objects.create(
                     user=user,
                     name= name,
+                    region=region,
+                    province=province,
+                    city=city,
                 )
             except:
                 pass
@@ -849,6 +872,9 @@ def edit_swdo_account_view(request, account_id):
                 'account_id': account_id,               
                 'name': SWDO_account.name,
                 'status': SWDO_account.status,
+                'region': SWDO_account.region,
+                'province': SWDO_account.province,
+                'city': SWDO_account.city,
             })
         except SWDOaccount.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Account not found'})
@@ -859,6 +885,9 @@ def edit_swdo_account_view(request, account_id):
             SWDO_account = get_object_or_404(SWDOaccount, user__id=account_id)
             SWDO_account.name = request.POST.get('edit_account_fname')
             SWDO_account.status = request.POST.get('edit_status')
+            SWDO_account.region = request.POST.get('edit_region')
+            SWDO_account.province = request.POST.get('edit_province')
+            SWDO_account.city = request.POST.get('edit_city')
             SWDO_account.save()
             return JsonResponse({'success': True, 'message': 'SWDO Account updated successfully'})
         except Exception as e:
@@ -1089,6 +1118,22 @@ def check_username_email(request):
         }
 
         return JsonResponse(response_data)
+
+@login_required
+def acc_city(request):
+    if request.method == 'GET':
+        # Get the city from the request
+        city = request.GET.get('city')
+        city = city.strip()  # Remove leading/trailing whitespace if any
+        city = city.upper()  # Convert to uppercase for case-insensitive comparison
+        if city:
+            # check if there is the same city in the database
+            city_taken = SWDOaccount.objects.filter(city=city).exists()
+        else:
+            city_taken = False
+
+        # Return the filtered accounts as JSON
+        return JsonResponse({'city_taken': city_taken})
 
 @login_required
 def admin_graph_view(request):
