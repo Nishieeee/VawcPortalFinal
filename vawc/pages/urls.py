@@ -123,7 +123,9 @@ urlpatterns = [
     path('admin-SWDO-vawc/view-SWDO-case/impacted/<int:case_id>/', views.view_SWDO_case_impact, name='SWDO case impacted view'),
     path('refer-SWDO/', views.refer_SWDO, name='refer_SWDO'),
     path('admin-SWDO-vawc/acc_city', views.acc_city, name='acc city'),
-
+    path('admin-SWDO-vawc/get_city_by_province/<int:province_id>/', views.get_city_by_province, name='get city by province'),
+    path('admin-SWDO-vawc/get_province_id', views.get_province_id, name='get province id'),
+    
     # NOTIF
     path('admin-barangay-vawc/notification', views.admin_notification_view, name="Notification"),
     path('read_notification/', views.read_notification, name='read_notification'),
@@ -169,6 +171,7 @@ urlpatterns = [
     #misc
     path('pages/select-address/', views.ph_address, name='ph_address'),
     path('pages/get-police-station/', views.get_police_station, name='get police station'),
+    
     
 ]
 

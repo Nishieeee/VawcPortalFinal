@@ -1135,6 +1135,55 @@ def acc_city(request):
         # Return the filtered accounts as JSON
         return JsonResponse({'city_taken': city_taken})
 
+
+@login_required
+def get_city_by_province(request, province_id):
+        
+        cities = Municipality.objects.filter(province_id=province_id,is_city=1).values('name')
+        city_list = [city['name'] for city in cities]
+
+        return JsonResponse({'city_list': city_list})
+
+@login_required
+def get_province_id(request):
+    if request.method == 'POST':
+        province_name = request.POST.get('province_name')
+        
+        if province_name:
+            try:
+                # Assuming you have a Province model with name and id fields
+                # Adjust the model name and field names according to your actual model
+                
+                province = Province.objects.filter(name__iexact=province_name).first()
+                
+                if province:
+                    return JsonResponse({
+                        'success': True,
+                        'province_id': province.id,
+                        'province_name': province.name
+                    })
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Province not found'
+                    })
+                    
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': str(e)
+                })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Province name is required'
+            })
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request method'
+    })
+
 @login_required
 def admin_graph_view(request):
     user = request.user

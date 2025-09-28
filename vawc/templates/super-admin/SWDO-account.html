@@ -149,7 +149,9 @@
                 </div>  
 
                 <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="city" name="city" placeholder="Input City" disabled>
+                    <select class="form-select" id="city" name="city" disabled>
+                        <option value="">--Select Option--</option>
+                    </select>
                     <label for="city">City</label>
                     <div id="account_cityFeedback" class="invalid-feedback">
                         City already have an account.
@@ -212,9 +214,11 @@
                 </div>
 
                 <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="edit_city" name="edit_city" placeholder="Input City">
+                    <select class="form-select" id="edit_city" name="edit_city" disabled>
+                        <option value="">--Select Option--</option>
+                    </select>
                     <label for="edit_city">City</label>
-                    <div id="account_cityFeedback" class="invalid-feedback">
+                    <div id="edit_account_cityFeedback" class="invalid-feedback">
                         City already have an account.
                     </div>
                     <div class="valid-feedback">
@@ -309,33 +313,32 @@
 
         $(document).on('click', '.edit-account-btn', function() {
             var accountId = $(this).data('account-id');
-            console.log(accountId);
             $.ajax({
                 url: '{% url "edit_SWDO_account" 0 %}'.replace('0', accountId),
                 method: 'GET',
-                success: function(response) {
-                    // console.log("Full response object:", response);
-
-                    // Populate the modal with the data from the response
+                success: async function(response) {
                     $('#account_id').val(response.account_id);
                     $('#edit_account_fname').val(response.name);
                     $('#edit_status').val(response.status);
-                    // Populate regions first
+
+                    // Populate regions
                     populateRegions('#edit_region', response.region);
+
+                    // Populate provinces
                     if(response.region) {
-                        setTimeout(() => {
-                            populateProvinces('#edit_province', response.region, response.province);
-                        }, 500);
+                        await setGeoSelectForEdit(document.querySelector('#edit_province'), {
+                            region: response.region,
+                            action: 'province',
+                            csrfmiddlewaretoken: csrf_token,
+                        }, response.province);
                     }
-                    // Set city value
-                    $('#edit_city').val(response.city);
-            
-                    // Show the modal
+
+                    // Populate cities for the selected province and set the selected city
+                    if(response.province) {
+                        await populateEditCities('#edit_city', response.province, response.city);
+                    }
+
                     $('#edit_law_enforcement_account').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    // Handle error
-                    console.error('Error:', error);
                 }
             });
         });
@@ -506,10 +509,10 @@
 
         region = formElement.querySelector(`#region`)
         province = formElement.querySelector(`#province`)
-        city = $(formElement).find(`#city`)
-    
+        city = formElement.querySelector(`#city`) // Changed to querySelector for select element
+
         province.disabled = true
-        city.prop('disabled', true)
+        city.disabled = true
 
         region.addEventListener('change', (e) => {
             console.log("region changed")
@@ -522,8 +525,12 @@
                     action: 'province',
                     csrfmiddlewaretoken: csrf_token,
                 });
-                province.disabled=false
+                province.disabled = false
                 console.log("enabled province")
+                
+                // Clear cities when region changes
+                city.innerHTML = '<option value="">--Select Option--</option>';
+                city.disabled = true;
             } else {
                 console.log('Please select a region.');
             }
@@ -532,32 +539,34 @@
         province.addEventListener('change', (e) => {
             const provinceName = e.target.value;
             if (provinceName) {
-                
-                city.prop('disabled', false)
-                console.log("enabled city")
-                
+                // Fetch cities for selected province
+                fetchCitiesByProvince(provinceName, city);
+                console.log("fetching cities for province:", provinceName)
             } else {
                 console.log('Please select a province.');
+                city.innerHTML = '<option value="">--Select Option--</option>';
+                city.disabled = true;
             }
         });
-
-        city.on('blur input keyup paste', function() {
-            const cityName = city.val().trim();
-            console.log("city input changed: ", cityName);
+        
+        // Update city validation to work with select dropdown
+        $(city).on('change', function() {
+            const cityName = $(this).val();
+            console.log("city changed: ", cityName);
             if(cityName){
                 city_have_an_acc = is_city_have_an_account(cityName)
                 console.log(city_have_an_acc)
                 if(city_have_an_acc){
                     console.log("city has an account")
-                    city.addClass('is-invalid');
-                    city.removeClass('is-valid');
+                    $(city).addClass('is-invalid');
+                    $(city).removeClass('is-valid');
                     $('#account_cityFeedback').show();
                     $('#account_cityFeedback.valid-feedback').hide();
                     $('#addAccountBtn').attr('disabled', 'disabled');
                 }else{
                     console.log("city do not have an account")
-                    city.removeClass('is-invalid');
-                    city.addClass('is-valid');
+                    $(city).removeClass('is-invalid');
+                    $(city).addClass('is-valid');
                     $('#account_cityFeedback').hide();
                     $('#account_cityFeedback.valid-feedback').show();
                     if (!$('#account_username').hasClass('is-invalid') && !$('#account_email').hasClass('is-invalid')) {
@@ -565,19 +574,18 @@
                     }
                 }
             } else {
-                // Clear validation when input is empty
-                city.removeClass('is-invalid is-valid');
+                // Clear validation when no city selected
+                $(city).removeClass('is-invalid is-valid');
                 $('#account_cityFeedback').hide();
                 $('#account_cityFeedback.valid-feedback').hide();
             }
         });
-
     }
     
     function editAddressListener(formElement, formType, count = 0) {
         let region = formElement.querySelector(`#edit_region`)
         let province = formElement.querySelector(`#edit_province`)
-        city = $(formElement).find(`#edit_city`)
+        let city = formElement.querySelector(`#edit_city`) // Changed to querySelector
 
         if(region){
             region.addEventListener('change', (e) => {
@@ -589,6 +597,10 @@
                         csrfmiddlewaretoken: csrf_token,
                     });
                     province.disabled = false;
+                    
+                    // Clear cities when region changes
+                    city.innerHTML = '<option value="">--Select Option--</option>';
+                    city.disabled = true;
                 } else {
                     console.log('Please select a region.');
                 }
@@ -599,43 +611,45 @@
             province.addEventListener('change', (e) => {
                 const provinceName = e.target.value;
                 if (provinceName) {
-                    $(city).prop('disabled', false);
-                    console.log("enabled city")
+                    // Fetch cities for selected province
+                    fetchCitiesByProvince(provinceName, city);
+                    console.log("fetching cities for province:", provinceName)
                 } else {
                     console.log('Please select a province.');
+                    city.innerHTML = '<option value="">--Select Option--</option>';
+                    city.disabled = true;
                 }
             });
         }
 
-        city.on('blur input keyup paste', function() {
-            const cityName = city.val().trim();
-            console.log("city input changed: ", cityName);
+        $(city).on('change', function() {
+            const cityName = $(this).val();
+            console.log("city changed: ", cityName);
             if(cityName){
                 city_have_an_acc = is_city_have_an_account(cityName)
                 console.log(city_have_an_acc)
                 if(city_have_an_acc){
                     console.log("city has an account")
-                    city.addClass('is-invalid');
-                    city.removeClass('is-valid');
-                    $('#account_cityFeedback').show();
-                    $('#account_cityFeedback.valid-feedback').hide();
+                    $(city).addClass('is-invalid');
+                    $(city).removeClass('is-valid');
+                    $('#edit_account_cityFeedback').show();
+                    $('#edit_account_cityFeedback.valid-feedback').hide();
                     $('#saveAccountBtn').attr('disabled', 'disabled');
                 }else{
                     console.log("city do not have an account")
-                    city.removeClass('is-invalid');
-                    city.addClass('is-valid');
-                    $('#account_cityFeedback').hide();
-                    $('#account_cityFeedback.valid-feedback').show();
+                    $(city).removeClass('is-invalid');
+                    $(city).addClass('is-valid');
+                    $('#edit_account_cityFeedback').hide();
+                    $('#edit_account_cityFeedback.valid-feedback').show();
                     $('#saveAccountBtn').removeAttr('disabled');
                 }
             } else {
-                // Clear validation when input is empty
-                city.removeClass('is-invalid is-valid');
-                $('#account_cityFeedback').hide();
-                $('#account_cityFeedback.valid-feedback').hide();
+                // Clear validation when no city selected
+                $(city).removeClass('is-invalid is-valid');
+                $('#edit_account_cityFeedback').hide();
+                $('#edit_account_cityFeedback.valid-feedback').hide();
             }
         });
-
     }
 
     //==
@@ -683,6 +697,7 @@
             selectElement.appendChild(blankOption);
 
             data.forEach(item => {
+                if(item.name === "ZAMBOANGA CITY") return; // Skip "Not Applicable"
                 const option = document.createElement('option');
                 option.value = item.name;
                 option.textContent = item.name;
@@ -745,6 +760,7 @@
             selectElement.appendChild(blankOption);
 
             data.forEach(item => {
+                 if(item.name === "ZAMBOANGA CITY") return; // Skip "Not Applicable"
                 const option = document.createElement('option');
                 option.value = item.name;
                 option.textContent = item.name;
@@ -773,9 +789,10 @@
     function populateProvinces(selectId, regionName, selectedValue = '') {
         if (!regionName) return;
         
-        // Clear provinces
+        // Clear provinces and cities
         $(selectId).empty();
         $(selectId).append('<option value="">--Select Option--</option>');
+        $('#edit_city').empty().append('<option value="">--Select Option--</option>').prop('disabled', true);
         
         // Fetch provinces for the selected region
         setGeoSelectForEdit(document.querySelector(selectId), {
@@ -784,7 +801,120 @@
             csrfmiddlewaretoken: csrf_token,
         }, selectedValue);
     }
+    
+    async function fetchCitiesByProvince(provinceName, selectElement) {
+        try {
+            // First get the province ID using the dedicated endpoint
+            const provinceResponse = await fetch('{% url "get province id" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrf_token
+                },
+                body: new URLSearchParams({
+                    'province_name': provinceName,
+                    'csrfmiddlewaretoken': csrf_token,
+                })
+            });
+            
+            const provinceData = await provinceResponse.json();
+            
+            if (provinceData.success) {
+                const provinceId = provinceData.province_id;
+                
+                // Now fetch cities using the province ID
+                const cityResponse = await fetch(`{% url 'get city by province' 0 %}`.replace('0', provinceId), {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrf_token
+                    }
+                });
+                
+                const cityData = await cityResponse.json();
+                
+                // Clear existing options
+                selectElement.innerHTML = '';
+                const blankOption = document.createElement('option');
+                blankOption.textContent = '--Select Option--';
+                blankOption.value = '';
+                selectElement.appendChild(blankOption);
+                
+                // Add cities to dropdown
+                cityData.city_list.forEach(cityName => {
+                    const option = document.createElement('option');
+                    option.value = cityName;
+                    option.textContent = cityName;
+                    selectElement.appendChild(option);
+                });
+                
+                selectElement.disabled = false;
+                console.log(`Loaded ${cityData.city_list.length} cities for province: ${provinceName}`);
+                
+            } else {
+                console.error('Province not found:', provinceData.error);
+                selectElement.innerHTML = '<option value="">Province not found</option>';
+                selectElement.disabled = true;
+            }
+            
+        } catch (error) {
+            console.error("Failed to fetch cities:", error);
+            selectElement.innerHTML = '<option value="">Error loading cities</option>';
+            selectElement.disabled = true;
+        }
+    }
 
+    async function populateEditCities(selectId, provinceName, selectedCity = '') {
+        const selectElement = document.querySelector(selectId);
+
+        // Get province ID
+        const provinceResponse = await fetch('{% url "get province id" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrf_token
+            },
+            body: new URLSearchParams({
+                'province_name': provinceName,
+                'csrfmiddlewaretoken': csrf_token,
+            })
+        });
+        const provinceData = await provinceResponse.json();
+
+        if (provinceData.success) {
+            const provinceId = provinceData.province_id;
+
+            // Get cities by province ID
+            const cityResponse = await fetch(`{% url 'get city by province' 0 %}`.replace('0', provinceId), {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrf_token
+                }
+            });
+            const cityData = await cityResponse.json();
+
+            // Populate city dropdown
+            selectElement.innerHTML = '';
+            const blankOption = document.createElement('option');
+            blankOption.textContent = '--Select Option--';
+            blankOption.value = '';
+            selectElement.appendChild(blankOption);
+
+            cityData.city_list.forEach(cityName => {
+                const option = document.createElement('option');
+                option.value = cityName;
+                option.textContent = cityName;
+                if (cityName === selectedCity) {
+                    option.selected = true;
+                }
+                selectElement.appendChild(option);
+            });
+
+            selectElement.disabled = false;
+        } else {
+            selectElement.innerHTML = '<option value="">Province not found</option>';
+            selectElement.disabled = true;
+        }
+    }
 
 </script>
 {% endblock scripts %}
