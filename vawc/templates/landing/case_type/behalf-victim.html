@@ -1414,9 +1414,9 @@
             let contactValue = ''
 
             // For example, you can log it to the console
-            console.log("Email entered: " + emailValue);
+            console.log('{{ csrf_token }}')
             console.log("Phone entered: " + phoneValue);
-
+            console.log("Email entered: " + emailValue);
             // Determine what url endpoint to use, either for email or phone
             requestURL = ''
             if(document.querySelector('#email-tab').classList.contains('active')) {

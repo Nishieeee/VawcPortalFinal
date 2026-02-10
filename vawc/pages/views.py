@@ -1267,6 +1267,7 @@ def email_confirm(request):
         result = r.json()
         # return JsonResponse({'result': result})
         if not result['success']:
+            print(result)
             return JsonResponse({'success': False, 'message': 'reCAPTCHA validation failed, please try again'})
         
         email = request.POST.get('contactConfirm')
