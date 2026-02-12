@@ -356,6 +356,7 @@
 
                         // Redirect to the track_case_info URL after 10 seconds
                         setTimeout(function() {
+                            grecaptcha.reset();
                             window.location.href = trackCaseInfoUrl;
                         }, 3000);
                     } else {
