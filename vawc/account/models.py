@@ -64,12 +64,9 @@ class LawEnforcementAccount(models.Model):
     province = models.CharField(max_length=100, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     barangay = models.CharField(max_length=100, null=True, blank=True)
-    ADMIN, STAFF = 'admin', 'staff'
-    TYPE_CHOICES = [(ADMIN, 'Admin'), (STAFF, 'Staff')]
     type = models.CharField(
-        max_length=5,
-        choices=TYPE_CHOICES,
-        default=STAFF
+        max_length=15,
+        default="law_enforcement"
     )
     passkey = models.CharField(max_length=100, null=True, blank=True)
     
