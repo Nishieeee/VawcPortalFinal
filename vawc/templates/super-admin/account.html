@@ -336,12 +336,12 @@
                 data: $(this).serialize(), // Serialize form data
                 success: function(response) {
                     if (response.success) {
-                        // Display success message and reload page after 2 seconds
+                        // Display success message and reload page after 1 seconds
                         $('#successToast .toast-body').text(response.message);
                         $('#successToast').toast('show');
                         setTimeout(function() {
                             location.reload();
-                        }, 2000);
+                        }, 1000);
                     } else {
                         // Display error message
                         $('#errorToast .toast-body').text(response.message);
@@ -430,12 +430,12 @@
                     console.log(response);
                     // Optionally, close the modal or show a success message
                     $('#edit_account').modal('hide');
-                    // Display success message and reload page after 2 seconds
+                    // Display success message and reload page after 1 seconds
                     $('#successToast .toast-body').text(response.message);
                     $('#successToast').toast('show');
                     setTimeout(function() {
                         location.reload();
-                    }, 2000);
+                    }, 1000);
                     // Refresh the page or update any UI as needed
                 },
                 error: function(xhr, status, error) {
