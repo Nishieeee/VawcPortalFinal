@@ -44,8 +44,6 @@ class Account(models.Model):
     
     def __str__(self):
         return self.user.username
-<<<<<<< HEAD
-=======
     
 class LawEnforcementAccount(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
@@ -104,7 +102,6 @@ class PoliceStations(models.Model):
 
     def __str__(self):
         return self.name
->>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
 
 class Passkey_Reset(models.Model):
     email = models.CharField(max_length=250, null=True, blank=True)
