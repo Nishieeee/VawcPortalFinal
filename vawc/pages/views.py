@@ -534,6 +534,176 @@ def admin_manage_account_view(request):
     })
 
 
+<<<<<<< HEAD
+=======
+@login_required
+def law_enforcement_manage_account_view(request):
+    # Emails to exclude
+    excluded_emails = ['admin@gmail.com', 'vawcdilg@gmail.com']
+
+    # Default/initial data to use when page loads
+    region_id = 10  # Region 9
+    province_id = 50  # Zamboanga del Sur
+    municipality_id = 1133  # Zamboanga City
+
+    # Exclude the specified emails from the queryset
+    users = CustomUser.objects.exclude(email__in=excluded_emails)
+    accounts = LawEnforcementAccount.objects.filter(user__in=users)
+
+    regions = Region.objects.filter(id=region_id).values('id', 'code', 'name')
+
+    # Strip names like 'REGION IX (ZAMBOANGA PENINSULA)' → 'REGION IX'
+    for r in regions:
+        if '(' in r['name']:
+            r['name'] = r['name'].split('(')[0].strip()
+
+    return render(request, 'super-admin/law-enforcement-account.html', {
+        'users': users,
+        'accounts': accounts,
+        'default_regions': regions,
+        'default_provinces': Province.objects.filter(region_id=region_id),
+        'default_police_stations': PoliceStations.objects.filter(region="Region 9"),  # 👈 Include this
+    })
+
+
+@login_required
+def healthcare_manage_account_view(request):
+    # Emails to exclude
+    excluded_emails = ['admin@gmail.com', 'vawcdilg@gmail.com']
+
+    # Default/initial data to use when page loads
+    region_id = 10  # Region 9
+    province_id = 50  # Zamboanga del Sur
+    municipality_id = 1133  # Zamboanga City
+
+    # Exclude the specified emails from the queryset
+    users = CustomUser.objects.exclude(email__in=excluded_emails)
+    accounts = HealthcareAccount.objects.filter(user__in=users)
+
+    regions = Region.objects.filter(id=region_id).values('id', 'code', 'name')
+
+    # Strip names like 'REGION IX (ZAMBOANGA PENINSULA)' → 'REGION IX'
+    for r in regions:
+        if '(' in r['name']:
+            r['name'] = r['name'].split('(')[0].strip()
+
+    return render(request, 'super-admin/healthcare-account.html', {
+        'users': users,
+        'accounts': accounts,
+        'default_regions': regions,
+        'default_provinces': Province.objects.filter(region_id=region_id),
+        'default_police_stations': PoliceStations.objects.filter(region="Region 9"),  # 👈 Include this
+    })
+    
+@login_required
+def swdo_manage_account_view(request):
+    # Emails to exclude
+    excluded_emails = ['admin@gmail.com', 'vawcdilg@gmail.com']
+
+
+    # Exclude the specified emails from the queryset
+    users = CustomUser.objects.exclude(email__in=excluded_emails)
+    accounts = SWDOaccount.objects.filter(user__in=users)
+
+    # Default/initial data to use when page loads
+    region_id = 10  # Region 9
+    province_id = 50  # Zamboanga del Sur
+    municipality_id = 1133  # Zamboanga City
+    
+    regions = Region.objects.filter(id=region_id).values('id', 'code', 'name')
+
+    # Strip names like 'REGION IX (ZAMBOANGA PENINSULA)' → 'REGION IX'
+    for r in regions:
+        if '(' in r['name']:
+            r['name'] = r['name'].split('(')[0].strip()
+
+    return render(request, 'super-admin/SWDO-account.html', {
+        'users': users,
+        'accounts': accounts,
+        'default_regions': regions,
+        'default_provinces': Province.objects.filter(region_id=region_id),
+    })
+
+
+@login_required
+def create_swdo_manage_account(request):
+    if request.method == 'POST':
+        try:
+            username = request.POST.get('account_username')
+            email = request.POST.get('account_email')
+            name = request.POST.get('account_fname')
+            region = request.POST.get('region')
+            province = request.POST.get('province')
+            city = request.POST.get('city')
+            
+            print(username, email, name,region,province,city)
+            
+            try:
+                password = generate_random_password()
+                passkey = generate_random_password()
+                subject = 'Account Creation from VAWC'
+                message = (
+                    f'--------------------------\n'
+                    f'Account Details\n'
+                    f'--------------------------\n\n'
+                    f'Here is your New Account From VAWC:\n\n'
+                    f'Region:  {region}\n'
+                    f'Province:  {province}\n'
+                    f'City:  {city}\n'
+                    f'Email:  {email}\n'
+                    f'Username:  {username}\n'
+                    f'Password:  {password}\n\n'
+                    f'--------------------------\n'
+                    f'This email was sent automatically. Please do not reply.'
+                )
+                send_email(email, subject, message)
+                # Create the user with provided data using the CustomUser manager
+                user = CustomUser.objects.create_user(username=username, email=email, password=password)
+                # Create the Account instance and link it to the user
+                account = SWDOaccount.objects.create(
+                    user=user,
+                    name= name,
+                    region=region,
+                    province=province,
+                    city=city,
+                )
+            except:
+                pass
+            # Return success response
+            return JsonResponse({'success': True, 'message': 'SWDO Account created successfully'})
+
+        except Exception as e:
+            # Return error response if something goes wrong
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+    else:
+        # Return error response for unsupported methods
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+    
+# def select_police_station(request):
+#     if request.method == "POST":
+#         action = request.POST.get("action")
+#         filter_value = request.POST.get("filter")
+
+#         if action == "province":
+#             provinces = (
+#                 PoliceStations.objects.filter(region=filter_value)
+#                 .values_list("province", flat=True)
+#                 .distinct()
+#             )
+#             data = [{"code": p, "name": p} for p in sorted(provinces)]
+#             return JsonResponse(data, safe=False)
+
+#         elif action == "station":
+#             stations = PoliceStations.objects.filter(province=filter_value)
+#             data = [{"code": s.name, "name": s.name} for s in stations]
+#             return JsonResponse(data, safe=False)
+
+#     return JsonResponse([], safe=False)
+
+
+
+>>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
 def edit_account_view(request, account_id):
     if request.method == 'GET':
         try: 
@@ -585,6 +755,125 @@ def edit_account_view(request, account_id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
 
+<<<<<<< HEAD
+=======
+
+def edit_law_enforcement_account_view(request, account_id):
+    if request.method == 'GET':
+        try: 
+            print(account_id)
+            police_account = get_object_or_404(LawEnforcementAccount, user_id=account_id)
+            regions = list(PoliceStations.objects.values('region').distinct())
+            provinces = list(PoliceStations.objects.values('province').distinct())
+            police_stations = list(PoliceStations.objects.all().values())
+
+            return JsonResponse({
+                'success': True,
+                'account_id': account_id,               
+                'first_name': police_account.first_name,
+                'middle_name': police_account.middle_name,
+                'last_name': police_account.last_name,
+                'status': police_account.status,
+                'region': police_account.region,
+                'province': police_account.province,
+                'station': police_account.station,
+                'default_regions': regions,
+                'default_provinces': provinces,
+                'default_police_stations': police_stations,
+            })
+        except LawEnforcementAccount.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Account not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    elif request.method == 'POST':
+        try:
+            police_account = get_object_or_404(LawEnforcementAccount, user__id=account_id)
+            police_account.first_name = request.POST.get('edit_account_fname')
+            police_account.middle_name = request.POST.get('edit_account_mname') 
+            police_account.last_name = request.POST.get('edit_account_lname')
+            police_account.status = request.POST.get('edit_status')
+            police_account.region = request.POST.get('edit_account_region')
+            police_account.province = request.POST.get('edit_account_province')
+            police_account.city = request.POST.get('edit_account_police_station')
+            police_account.save()
+            return JsonResponse({'success': True, 'message': 'Account updated successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+
+def edit_healthcare_account_view(request, account_id):
+    if request.method == 'GET':
+        try: 
+            print(account_id)
+            healthcare_account = get_object_or_404(HealthcareAccount, user_id=account_id)
+            regions = list(HealthcareAccount.objects.values('region').distinct())
+            provinces = list(PoliceStations.objects.values('province').distinct())
+
+            return JsonResponse({
+                'success': True,
+                'account_id': account_id,               
+                'first_name': healthcare_account.first_name,
+                'middle_name': healthcare_account.middle_name,
+                'last_name': healthcare_account.last_name,
+                'status': healthcare_account.status,
+                'region': healthcare_account.region,
+                'province': healthcare_account.province,
+                'default_regions': regions,
+                'default_provinces': provinces,
+                'hospital_name': healthcare_account.hospital_name,
+            })
+        except HealthcareAccount.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Healthcare Account not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    elif request.method == 'POST':
+        try:
+            healthcare_account = get_object_or_404(HealthcareAccount, user__id=account_id)
+            healthcare_account.first_name = request.POST.get('edit_account_fname')
+            healthcare_account.middle_name = request.POST.get('edit_account_mname') 
+            healthcare_account.last_name = request.POST.get('edit_account_lname')
+            healthcare_account.status = request.POST.get('edit_status')
+            healthcare_account.region = request.POST.get('edit_account_region')
+            healthcare_account.province = request.POST.get('edit_account_province')
+            healthcare_account.hospital_name = request.POST.get('edit_account_hospital_name')
+            healthcare_account.save()
+            return JsonResponse({'success': True, 'message': 'Account updated successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+def edit_swdo_account_view(request, account_id):
+    if request.method == 'GET':
+        try: 
+            print(account_id)
+            SWDO_account = get_object_or_404(SWDOaccount, user_id=account_id)
+          
+            return JsonResponse({
+                'success': True,
+                'account_id': account_id,               
+                'name': SWDO_account.name,
+                'status': SWDO_account.status,
+                'region': SWDO_account.region,
+                'province': SWDO_account.province,
+                'city': SWDO_account.city,
+            })
+        except SWDOaccount.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Account not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    elif request.method == 'POST':
+        try:
+            SWDO_account = get_object_or_404(SWDOaccount, user__id=account_id)
+            SWDO_account.name = request.POST.get('edit_account_fname')
+            SWDO_account.status = request.POST.get('edit_status')
+            SWDO_account.region = request.POST.get('edit_region')
+            SWDO_account.province = request.POST.get('edit_province')
+            SWDO_account.city = request.POST.get('edit_city')
+            SWDO_account.save()
+            return JsonResponse({'success': True, 'message': 'SWDO Account updated successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+>>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
 @login_required
 def delete_account(request):
     if request.method == 'POST':
@@ -686,6 +975,71 @@ def check_username_email(request):
         }
 
         return JsonResponse(response_data)
+
+@login_required
+def acc_city(request):
+    if request.method == 'GET':
+        # Get the city from the request
+        city = request.GET.get('city')
+        city = city.strip()  # Remove leading/trailing whitespace if any
+        city = city.upper()  # Convert to uppercase for case-insensitive comparison
+        if city:
+            # check if there is the same city in the database
+            city_taken = SWDOaccount.objects.filter(city=city).exists()
+        else:
+            city_taken = False
+
+        # Return the filtered accounts as JSON
+        return JsonResponse({'city_taken': city_taken})
+
+
+@login_required
+def get_city_by_province(request, province_id):
+        
+        cities = Municipality.objects.filter(province_id=province_id,is_city=1).values('name')
+        city_list = [city['name'] for city in cities]
+
+        return JsonResponse({'city_list': city_list})
+
+@login_required
+def get_province_id(request):
+    if request.method == 'POST':
+        province_name = request.POST.get('province_name')
+        
+        if province_name:
+            try:
+                # Assuming you have a Province model with name and id fields
+                # Adjust the model name and field names according to your actual model
+                
+                province = Province.objects.filter(name__iexact=province_name).first()
+                
+                if province:
+                    return JsonResponse({
+                        'success': True,
+                        'province_id': province.id,
+                        'province_name': province.name
+                    })
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Province not found'
+                    })
+                    
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': str(e)
+                })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Province name is required'
+            })
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request method'
+    })
 
 @login_required
 def admin_graph_view(request):

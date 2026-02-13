@@ -73,7 +73,34 @@ urlpatterns = [
     path('admin-barangay-vawc/view-case/impacted/<int:case_id>/', views.view_case_impact, name='barangay case impacted view'),
     path('admin-barangay-vawc/case/pdf/<int:case_id>/', views.pdf_template_view, name='pdf case'),
     path('process_service_info/', views.process_service_info, name='process_service_info'),
+<<<<<<< HEAD
 
+=======
+    # path('pages/select-police-station/', views.select_police_station, name='select-police-station'),
+
+    # healthcare admin side============================================================================================
+    path('admin-healthcare-vawc/dashboard/', views.healthcare_dashboard_view, name='healthcare dashboard'),
+    path('admin-healthcare-vawc/healthcare-dashboard-data/<int:get_year>/', views.healthcare_dashboard_data, name='healthcare dashboard data'),
+    path('admin-healthcare-vawc/case/', views.healthcare_case_view, name='healthcare case'),
+    path('admin-healthcare-vawc/settings/', views.healthcare_settings_view, name='healthcare settings'),
+    path('refer-healthcare/', views.refer_healthcare, name='refer_healthcare'),
+    path('admin-healthcare-vawc/view-healthcare-case/impacted/<int:case_id>/', views.view_healthcare_case_impact, name='healthcare case impacted view'),
+    path('admin-healthcare-vawc/view-healthcare-case/behalf/<int:case_id>/', views.view_healthcare_case_behalf, name='healthcare case behalf view'),
+    
+    # SWDO admin side============================================================================================
+
+    path('admin-SWDO-vawc/dashboard/', views.SWDO_dashboard_view, name='SWDO dashboard'),
+    path('admin-SWDO-vawc/SWDO-dashboard-data/<int:get_year>/', views.SWDO_dashboard_data, name='SWDO dashboard data'),
+    path('admin-SWDO-vawc/case/', views.SWDO_case_view, name='SWDO case'),
+    path('admin-SWDO-vawc/settings/', views.SWDO_settings_view, name='SWDO settings'),
+    path('admin-SWDO-vawc/view-SWDO-case/behalf/<int:case_id>/', views.view_SWDO_case_behalf, name='SWDO case behalf view'),
+    path('admin-SWDO-vawc/view-SWDO-case/impacted/<int:case_id>/', views.view_SWDO_case_impact, name='SWDO case impacted view'),
+    path('refer-SWDO/', views.refer_SWDO, name='refer_SWDO'),
+    path('admin-SWDO-vawc/acc_city', views.acc_city, name='acc city'),
+    path('admin-SWDO-vawc/get_city_by_province/<int:province_id>/', views.get_city_by_province, name='get city by province'),
+    path('admin-SWDO-vawc/get_province_id', views.get_province_id, name='get province id'),
+    
+>>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
     # NOTIF
     path('admin-barangay-vawc/notification', views.admin_notification_view, name="Notification"),
     path('read_notification/', views.read_notification, name='read_notification'),
@@ -117,7 +144,14 @@ urlpatterns = [
 
 
     #misc
+<<<<<<< HEAD
     path('pages/select-address/', views.ph_address, name='ph_address')
+=======
+    path('pages/select-address/', views.ph_address, name='ph_address'),
+    path('pages/get-police-station/', views.get_police_station, name='get police station'),
+    
+    
+>>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
 ]
 
 # Serve media files during development
