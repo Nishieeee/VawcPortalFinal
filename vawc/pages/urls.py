@@ -73,9 +73,6 @@ urlpatterns = [
     path('admin-barangay-vawc/view-case/impacted/<int:case_id>/', views.view_case_impact, name='barangay case impacted view'),
     path('admin-barangay-vawc/case/pdf/<int:case_id>/', views.pdf_template_view, name='pdf case'),
     path('process_service_info/', views.process_service_info, name='process_service_info'),
-<<<<<<< HEAD
-
-=======
     # path('pages/select-police-station/', views.select_police_station, name='select-police-station'),
 
     # healthcare admin side============================================================================================
@@ -100,7 +97,6 @@ urlpatterns = [
     path('admin-SWDO-vawc/get_city_by_province/<int:province_id>/', views.get_city_by_province, name='get city by province'),
     path('admin-SWDO-vawc/get_province_id', views.get_province_id, name='get province id'),
     
->>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
     # NOTIF
     path('admin-barangay-vawc/notification', views.admin_notification_view, name="Notification"),
     path('read_notification/', views.read_notification, name='read_notification'),
@@ -144,14 +140,10 @@ urlpatterns = [
 
 
     #misc
-<<<<<<< HEAD
-    path('pages/select-address/', views.ph_address, name='ph_address')
-=======
     path('pages/select-address/', views.ph_address, name='ph_address'),
     path('pages/get-police-station/', views.get_police_station, name='get police station'),
     
     
->>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
 ]
 
 # Serve media files during development
