@@ -39,7 +39,7 @@
                         </div>
                         <div class="col-12 col-md-12 col-sm-8 pt-3 pt-2">
                             <button id="submitButton" class="btn btn-primary w-100 d-flex justify-content-center align-items-center" type="submit">
-                                <span>Log in</span>
+                                <span id="login-text-form">Log in</span>
                                 <div class="spinner-border text-light position-absolute" role="status" style="display: none;">
                                 </div>
                             </button>
@@ -144,7 +144,7 @@
             event.preventDefault();
             $('.spinner-border').show();
             $('#submitButton').prop('disabled', true);
-
+            $('#login-text-form').addClass('text-color-primary')
             var formData = $(this).serialize();
             $.ajax({
                 type: 'POST',
@@ -154,6 +154,7 @@
                     if (response.success) {
                         $('#barangay-email').removeClass('is-invalid');
                         $('#barangay-passkey').removeClass('is-invalid');
+                        $('#login-text-form').removeClass('text-color-primary')
                         $('#successMessage').text(response.message);
                         $('#barangay-passkeyFeedback').hide()
                         console.log(response.message);
@@ -193,6 +194,7 @@
                     }
 
                     $('.spinner-border').hide();
+                    $('#login-text-form').removeClass('text-color-primary')
                     $('#submitButton').prop('disabled', false);
 
                 },
