@@ -72,21 +72,6 @@ class LawEnforcementAccount(models.Model):
     
     def __str__(self):
         return self.user.username
-<<<<<<< HEAD
-=======
-    
-class SWDOaccount(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
-    name = models.CharField(max_length=100)
-    status = models.CharField(max_length=100, null=True, blank=True, default='Active')
-    type = models.CharField(max_length=20, default='SWDO')
-    region = models.CharField(max_length=100, null=True, blank=True)
-    province = models.CharField(max_length=100, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    
-    def __str__(self):
-        return self.user.username
->>>>>>> 6de9e30eb915bc84cf0a640dfbe2c69ac217e504
 
 class PoliceStation(models.Model):
     name = models.CharField(max_length=255)
