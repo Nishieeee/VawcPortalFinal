@@ -538,16 +538,17 @@ def edit_account_view(request, account_id):
     if request.method == 'GET':
         try: 
             
-            
+            # default for fallback if in case user has none
+            defaultRegion = 10 # region 9
+            province_id = 50 # zamboanga del sur
+            municipality_id = 1133 # zamboanga city
 
             print(account_id)
             account = get_object_or_404(Account, user__id=account_id)
-            regions = list(Region.objects.filter(name=account.region).values())
+            regions = list(Region.objects.filter(name=account.region).values()) or list(Region.objects.filter(id=defaultRegion).values())
             provinces = list(Province.objects.filter(region_id = Province.objects.filter(name=account.province).values('region_id').first()['region_id']).values())
             cities = list(Municipality.objects.filter(province_id = Municipality.objects.filter(name=account.city).values('province_id').first()['province_id']).values())
             barangays = list(Barangay.objects.filter(municipality_id = Barangay.objects.filter(name=account.barangay).values('municipality_id').first()['municipality_id']).values())
-            
-
             return JsonResponse({
                 'success': True,
                 'account_id': account_id,               
