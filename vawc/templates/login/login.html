@@ -39,7 +39,7 @@
                         </div>
                         <div class="col-12 col-md-12 col-sm-8 pt-3 pt-2">
                             <button id="submitButton" class="btn btn-primary w-100 d-flex justify-content-center align-items-center" type="submit">
-                                <span>Log in</span>
+                                <span id="loginBtnText">Log in</span>
                                 <div class="spinner-border text-light position-absolute" role="status" style="display: none;">
                                 </div>
                             </button>
@@ -144,6 +144,7 @@
             event.preventDefault();
             $('.spinner-border').show();
             $('#submitButton').prop('disabled', true);
+            $('#loginBtnText').addClass('text-color-primary')
 
             var formData = $(this).serialize();
             $.ajax({
@@ -194,6 +195,7 @@
 
                     $('.spinner-border').hide();
                     $('#submitButton').prop('disabled', false);
+                    $('#loginBtnText').removeClass()
 
                 },
                 error: function(xhr, errmsg, err) {
