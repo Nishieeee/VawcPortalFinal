@@ -1788,7 +1788,7 @@
           <h5 class="modal-title" id="staticBackdropLabel">Adding Status</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form id="statusForm">
+        <form id="statusForm" method="POST">
             {% csrf_token %}
             <div class="modal-body">
                 <input type="hidden" id="caseId" value="{{ case.id }}">
@@ -1807,7 +1807,7 @@
               </div><!--end of body-->
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" id="submit_status" class="btn btn-primary">Done</button>
+                <input type="submit" id="submit_status" class="btn btn-primary" value="Done"/>
               </div>
         </form>
       </div>
@@ -2545,7 +2545,7 @@
                         setTimeout(function() {
                             $('#statusAdd').modal('hide'); // Close modal
                             location.reload(); // Reload the page
-                        }, 2000);
+                        }, 1000);
                     } else {
                         // Display error toast
                         $('.toast-body').text('Error: ' + response.message);
@@ -2624,7 +2624,7 @@
                         // Reload the page after 2 seconds
                         setTimeout(function() {
                             location.reload();
-                        }, 2000);
+                        }, 1000);
                     } else {
                         // Show toast with error message
                         $('.toast-body').text(response.message);
