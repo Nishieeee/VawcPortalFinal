@@ -69,7 +69,7 @@
                                     <div class="g-recaptcha d-flex justify-content-center" data-callback="err_captcha_reset" data-sitekey="{{ site_key }}"></div>
                                     <div class="err-msg-recaptcha fs-7 text-danger"></div>
                                     <button id="submitButton" class="btn btn-primary w-100 mb-4 mt-3 d-flex justify-content-center align-items-center" type="submit" >
-                                        <span id="submitBtnText">Track Case</span>
+                                        <span>Track Case</span>
                                         <div class="spinner-border text-light position-absolute" role="status" style="display: none;">
                                         </div>
                                     </button>
@@ -162,8 +162,7 @@
 
             $('.spinner-border').show();
             $('#submitButton').prop('disabled', true);
-            $('#submitBtnText').addClass('text-color-primary')
-
+        
             // Get the email value from the input field
             var emailValue = $('#email').val();
             var phoneValue = $('#phone').val();
@@ -193,7 +192,6 @@
                 $('.err-msg-recaptcha').text('You need to solve captcha first')
                 $('.spinner-border').hide();
                 $('#submitButton').prop('disabled', false);
-                $('#submitBtnText').removeClass()
                 throw new Error('reCAPTCHA validation failed')
             }
             
@@ -212,8 +210,6 @@
                     
                     $('.spinner-border').show();
                     $('#submitButton').prop('disabled', true);
-                    $('#submitBtnText').addClass('text-color-primary')
-
 
                     // Server-side validation response
                     if (!response.success) {
@@ -231,7 +227,6 @@
                         
                         $('.spinner-border').hide();
                         $('#submitButton').prop('disabled', false);
-                        $('#submitBtnText').removeClass();
                         
                         throw new Error(response.message)
                     }
@@ -257,7 +252,6 @@
                                     $('.err-msg-case').text(response.message_case)
                                     $('.spinner-border').hide();
                                     $('#submitButton').prop('disabled', false);
-                                    $('#submitBtnText').removeClass();
                                     $('#case_num').addClass('is-invalid')
                                     $('#case_num').parent().addClass('is-invalid')
                                     
@@ -289,8 +283,6 @@
                                             if (!response.success) {
                                                 $('.spinner-border').hide();
                                                 $('#submitButton').prop('disabled', false);
-                                                $('#submitBtnText').removeClass();
-
                                                 $('#email').val('');
                                                 throw new Error('reCaptcha validation failed')
                                             }
@@ -416,9 +408,9 @@
                         trackCaseInfoUrl = trackCaseInfoUrl.replace('__contact_type__', get_contact_type());
                         trackCaseInfoUrl = trackCaseInfoUrl.replace('__token__', response.token);
                         trackCaseInfoUrl = trackCaseInfoUrl.replace('__case_num__', $('#case_num').val());
-
-                        // redirect to track_case info
-                        window.location.href = trackCaseInfoUrl;
+                        setTimeout(function() {
+                            window.location.href = trackCaseInfoUrl;
+                        }, 3000);
                     } else {
                         console.log('i am here in trackcase.html but eeror');
                         $('#otpErrorMessage').text(response.message);
