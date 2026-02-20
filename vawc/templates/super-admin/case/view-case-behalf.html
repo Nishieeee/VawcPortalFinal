@@ -3222,9 +3222,12 @@
                 }
             });
         });
+        // ADD THIS WRAPPER AROUND YOUR FLAG LOGIC
+        $('#btn-submit-law-enforcement').click(function(event) {
+            event.preventDefault();
+            
+            var flag = false; // Add your validation logic here to set the flag to true or false
 
-
-<<<<<<< HEAD
             if(flag) {
                 // Show error toast
                 $('#errorToast .toast-body').text('Please fill out all required fields.');
@@ -3520,11 +3523,7 @@
             });
         
         });
-
         
-        
-=======
->>>>>>> main
     });
 
 </script>
