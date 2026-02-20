@@ -69,7 +69,7 @@
                                     <div class="g-recaptcha d-flex justify-content-center" data-callback="err_captcha_reset" data-sitekey="{{ site_key }}"></div>
                                     <div class="err-msg-recaptcha fs-7 text-danger"></div>
                                     <button id="submitButton" class="btn btn-primary w-100 mb-4 mt-3 d-flex justify-content-center align-items-center" type="submit" >
-                                        <span>Track Case</span>
+                                        <span id="form-submit-text">Track Case</span>
                                         <div class="spinner-border text-light position-absolute" role="status" style="display: none;">
                                         </div>
                                     </button>
@@ -162,7 +162,7 @@
 
             $('.spinner-border').show();
             $('#submitButton').prop('disabled', true);
-        
+            $('#form-submit-text').addClass('text-color-primary')
             // Get the email value from the input field
             var emailValue = $('#email').val();
             var phoneValue = $('#phone').val();
@@ -191,6 +191,7 @@
                 $('.g-recaptcha').children().css('border', '1px solid red')
                 $('.err-msg-recaptcha').text('You need to solve captcha first')
                 $('.spinner-border').hide();
+                $('#form-submit-text').removeClass('text-color-primary')
                 $('#submitButton').prop('disabled', false);
                 throw new Error('reCAPTCHA validation failed')
             }
@@ -210,6 +211,7 @@
                     
                     $('.spinner-border').show();
                     $('#submitButton').prop('disabled', true);
+                     $('#form-submit-text').addClass('text-color-primary')
 
                     // Server-side validation response
                     if (!response.success) {
@@ -378,6 +380,11 @@
                 url: requestURL,
                 data: formData,
                 success: function(response) {
+                    // reset recaptcha token
+                    if (typeof grecaptcha !== 'undefined') {
+                        grecaptcha.reset(); 
+                    }
+
                     if (response.success) {
                         
                         //$('#successMessage').text(response.message);

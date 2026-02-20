@@ -148,7 +148,7 @@
             event.preventDefault();
             $('.spinner-border').show();
             $('#submitButton').prop('disabled', true);
-
+            $('#login-text-form').addClass('text-color-primary')
             var formData = $(this).serialize();
             $.ajax({
                 type: 'POST',
@@ -158,6 +158,7 @@
                     if (response.success) {
                         $('#barangay-email').removeClass('is-invalid');
                         $('#barangay-passkey').removeClass('is-invalid');
+                        $('#login-text-form').removeClass('text-color-primary')
                         $('#successMessage').text(response.message);
                         $('#barangay-passkeyFeedback').hide()
                         console.log(response.message);
@@ -197,6 +198,7 @@
                     }
 
                     $('.spinner-border').hide();
+                    $('#login-text-form').removeClass('text-color-primary')
                     $('#submitButton').prop('disabled', false);
 
                 },

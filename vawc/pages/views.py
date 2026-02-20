@@ -74,6 +74,8 @@ def login_view (request):
     if request.user.is_authenticated:
         if hasattr(request.user, 'account') and request.user.account.type == 'admin':
             return redirect('admin dashboard')
+        elif hasattr(request.user, 'account') and request.user.account.type == 'law_enforcement':
+            return redirect(request.user, 'admin dashboard')
         elif hasattr(request.user, 'account') and request.user.account.type == 'staff':
             return redirect('barangay dashboard')
         else:
@@ -1411,6 +1413,13 @@ def get_all_notification_admin(request):
 
     # Return JSON response with list of dictionaries and flag indicating unread notifications
     return JsonResponse({'notifications': notifications_list, 'unread_notifications_exist': unread_notifications_exist})
+@login_required
+def law_enforcement_view_case_behalf(request):
+    pass
+
+@login_required
+def law_enforcement_view_case_impacted(request):
+    pass
 
 @login_required
 def barangay_dashboard_view (request):
@@ -2064,6 +2073,7 @@ def email_confirm(request):
         result = r.json()
         # return JsonResponse({'result': result})
         if not result['success']:
+            print(result)
             return JsonResponse({'success': False, 'message': 'reCAPTCHA validation failed, please try again'})
         
         email = request.POST.get('contactConfirm')
