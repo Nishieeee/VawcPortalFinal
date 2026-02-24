@@ -2868,7 +2868,9 @@ def view_admin_case_impact(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces':  Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu') # add filter to include sulu as a region
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
             'default_stations': json.dumps(list(PoliceStations.objects.values('name', 'province'))),
@@ -3023,7 +3025,9 @@ def view_case_behalf(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces':  Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu') # add filter to include sulu as a region
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
             'default_stations': json.dumps(list(PoliceStations.objects.values('name', 'province'))),
@@ -3144,7 +3148,9 @@ def view_case_impact(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu') # add filter to include sulu as a region
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
             'default_stations': json.dumps(list(PoliceStations.objects.values('name', 'province'))),
@@ -5022,7 +5028,9 @@ def view_SWDO_case_behalf(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu')
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
             'default_stations': PoliceStations.objects.all(),
@@ -5138,7 +5146,9 @@ def view_SWDO_case_impact(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu')
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
             'default_stations': PoliceStations.objects.all(),
@@ -5260,7 +5270,9 @@ def view_healthcare_case_impact(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu')
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
 
@@ -5420,7 +5432,9 @@ def view_healthcare_case_behalf(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu')
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
             'service_information': case.service_information,
