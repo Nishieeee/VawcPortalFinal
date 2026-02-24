@@ -120,12 +120,8 @@ class LawEnforcementAccount(models.Model):
     status = models.CharField(max_length=100, null=True, blank=True, default='Active')
     region = models.CharField(max_length=100, null=True, blank=True)
     province = models.CharField(max_length=100, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    barangay = models.CharField(max_length=100, null=True, blank=True)
-    type = models.CharField(
-        max_length=15,
-        default="law_enforcement"
-    )
+    station = models.CharField(max_length=100, null=True, blank=True)
+    type = models.CharField(max_length=20, default='law_enforcement')
     passkey = models.CharField(max_length=100, null=True, blank=True)
     
     def __str__(self):
@@ -165,6 +161,17 @@ class Twilio(models.Model):
     auth_token = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     type = models.CharField(max_length=20, null=True, blank=True)
+    TYPE_CHOICES = [
+        ('local', 'Local'),
+        ('deployed', 'Deployed'),
+    ]
+    account_type = models.CharField(
+        max_length=20,
+        choices=TYPE_CHOICES,
+        default='local',
+        null=False,
+        blank=False
+    )
 
     def __str__(self):
         return f"Account SID: {self.account_sid} - From contact: {self.phone_number}"
