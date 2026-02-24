@@ -98,6 +98,7 @@ urlpatterns = [
     path('admin-law-enforcement-vawc/dashboard/', views.lawEnforcement_dashboard_view, name='law enforcement dashboard'),
     path('admin-law-enforcement-vawc/law-enforcement-dashboard-data/<int:get_year>/', views.LawEnforcement_dashboard_data, name='law enforcement dashboard data'),
     path('admin-law-enforcement-vawc/case/', views.law_enforcement_case_view, name='law enforcement case'),
+    path('admin-law-enforcement-vawc/add-new-case', views.add_new_case_by_law_enforcement, name="add new law enforcement case"),
     path('admin-law-enforcement-vawc/view-law-enforcement-case/behalf/<int:case_id>/', views.view_enforcement_case_behalf, name='law enforcement case behalf view'),
     path('admin-law-enforcement-vawc/view-law-enforcement-case/impacted/<int:case_id>/', views.view_enforcement_case_impact, name='law enforcement case impacted view'),
     path('admin-law-enforcement-vawc/case/pdf/<int:case_id>/', views.pdf_template_view, name='pdf case'),
