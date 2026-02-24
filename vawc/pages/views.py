@@ -550,6 +550,11 @@ def admin_manage_account_view(request):
     province_id = 50 # zamboanga del sur
     municipality_id = 1133 # zamboanga city
     
+    custom_provinces = Province.objects.filter(
+        Q(region_id=region_id) | Q(name__icontains='Sulu')
+    )
+    
+    print(custom_provinces)
     # Exclude the specified emails from the queryset
     users = CustomUser.objects.exclude(email__in=excluded_emails)
     accounts = Account.objects.filter(user__in=users)
@@ -592,7 +597,9 @@ def law_enforcement_manage_account_view(request):
         'users': users,
         'accounts': accounts,
         'default_regions': regions,
-        'default_provinces': Province.objects.filter(region_id=region_id),
+        'default_provinces':Province.objects.filter(
+            Q(region_id=region_id) | Q(name__icontains='Sulu')
+        ),
         'default_police_stations': PoliceStations.objects.filter(region="Region 9"),  # 👈 Include this
     })
 
@@ -622,7 +629,11 @@ def healthcare_manage_account_view(request):
         'users': users,
         'accounts': accounts,
         'default_regions': regions,
-        'default_provinces': Province.objects.filter(region_id=region_id),
+        'default_provinces': list(
+            Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu')
+            ).values()
+        ),
         'default_police_stations': PoliceStations.objects.filter(region="Region 9"),  # 👈 Include this
     })
     
@@ -740,7 +751,11 @@ def edit_account_view(request, account_id):
             print(account_id)
             account = get_object_or_404(Account, user__id=account_id)
             regions = list(Region.objects.filter(name=account.region).values())
-            provinces = list(Province.objects.filter(region_id = Province.objects.filter(name=account.province).values('region_id').first()['region_id']).values())
+            provinces = list(
+                Province.objects.filter(
+                    Q(region_id=10) | Q(name__icontains='Sulu')
+                ).values()
+            )
             cities = list(Municipality.objects.filter(province_id = Municipality.objects.filter(name=account.city).values('province_id').first()['province_id']).values())
             barangays = list(Barangay.objects.filter(municipality_id = Barangay.objects.filter(name=account.barangay).values('municipality_id').first()['municipality_id']).values())
             
@@ -2203,6 +2218,7 @@ def impact_victim_view (request):
 
     # default/initial data to use when page loads
     region_id = 10 # region 9
+    province_id = 50 # zamboanga del sur
     municipality_id = 1133 # zamboanga city
     
     return render(request, 'landing/case_type/impacted-victim.html', {
@@ -2212,6 +2228,7 @@ def impact_victim_view (request):
         'default_provinces': Province.objects.filter(
                 Q(region_id=region_id) | Q(name__icontains='Sulu') # default provinces include region IX and sulu
         ),
+        'default_cities': Municipality.objects.filter(province_id=province_id),
         'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
         })
 
@@ -4808,7 +4825,9 @@ def ph_address(request):
         if data.get('action') == 'province':
             filter_value = data.get('filter')
             region = Region.objects.get(code=filter_value)
-            provinces = Province.objects.filter(region=region).order_by('name').values('code', 'name')
+            
+            provinces = Province.objects.filter(Q(region=region) | Q(name__icontains='Sulu')).order_by('name').values('code', 'name')
+            # provinces = Province.objects.filter(region=region).order_by('name').values('code', 'name')
             return JsonResponse(list(provinces), safe=False)
         elif data.get('action') == 'city':
             filter_value = data.get('filter')
@@ -4833,9 +4852,17 @@ def get_police_station(request):
 
         if action == "province":
             region_name = request.POST.get("region")
-            provinces = PoliceStations.objects.filter(
-                region=region_name
-            ).values_list("province", flat=True).distinct().order_by("province")
+            
+            # Check if the requested region is Region IX 
+            # (Note: Adjust 'Region IX' or '10' to match the exact string or ID your frontend sends)
+            if region_name in ['Region IX', 'Region 9', '10']: 
+                provinces = PoliceStations.objects.filter(
+                    Q(region=region_name) | Q(province__icontains='Sulu')
+                ).values_list("province", flat=True).distinct().order_by("province")
+            else:
+                provinces = PoliceStations.objects.filter(
+                    Q(region=region_name) | Q(province__icontains='Sulu')
+                ).values_list("province", flat=True).distinct().order_by("province")
             
             data = [{"name": province} for province in provinces]
             return JsonResponse(data, safe=False)
@@ -4850,7 +4877,6 @@ def get_police_station(request):
             return JsonResponse(data, safe=False)
 
     return JsonResponse([], safe=False)
-
 
 
 @login_required
