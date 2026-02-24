@@ -558,7 +558,9 @@ def admin_manage_account_view(request):
         'users': users,
         'accounts': accounts,
         'default_regions': Region.objects.filter(id=region_id),
-        'default_provinces': Province.objects.filter(region_id=region_id),
+        'default_provinces': Province.objects.filter(
+            Q(region_id=region_id) | Q(name__icontains='Sulu')
+        ),
         'default_cities': Municipality.objects.filter(province_id=province_id),
         'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
 
@@ -2201,15 +2203,15 @@ def impact_victim_view (request):
 
     # default/initial data to use when page loads
     region_id = 10 # region 9
-    province_id = 50 # zamboanga del sur
     municipality_id = 1133 # zamboanga city
     
     return render(request, 'landing/case_type/impacted-victim.html', {
         'site_key': recaptcha['site_key'],
         'twilio_type': twilio_type,
         'default_regions': Region.objects.filter(id=region_id),
-        'default_provinces': Province.objects.filter(region_id=region_id),
-        'default_cities': Municipality.objects.filter(province_id=province_id),
+        'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu') # default provinces include region IX and sulu
+        ),
         'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
         })
 
@@ -2229,7 +2231,9 @@ def behalf_victim_view (request):
         'site_key': recaptcha['site_key'],
         'twilio_type': twilio_type,
         'default_regions': Region.objects.filter(id=region_id),
-        'default_provinces': Province.objects.filter(region_id=region_id),
+        'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu') # default provinces include region IX and sulu
+        ),
         'default_cities': Municipality.objects.filter(province_id=province_id),
         'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
         })
@@ -2729,7 +2733,9 @@ def view_admin_case_behalf(request, case_id):
             'latest_status_history': latest_status_history,
             'global': request.session,
             'default_regions': Region.objects.filter(id=region_id),
-            'default_provinces': Province.objects.filter(region_id=region_id),
+            'default_provinces': Province.objects.filter(
+                Q(region_id=region_id) | Q(name__icontains='Sulu') # default provinces include region IX and sulu
+            ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
             'default_stations': json.dumps(list(PoliceStations.objects.values('name', 'province'))),

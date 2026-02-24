@@ -160,7 +160,7 @@
                                             <h3 class="fs-5 col-12 my-3">Local Address</h3>
                                             <div class="col-sm-6 mb-3"> <!--region-->
                                                 <label for="victim-region_0" class="form-label">Region <span class="required"></span></label>
-                                                <select id="victim-region_0" name="victim-region_0" class="form-select req-inp" >
+                                                <select id="victim-region_0" name="victim-region_0" class="form-select req-inp" disabled>
                                                     {% for region in default_regions %}
                                                         <option value="{{ region.name }}" data-code="{{ region.code }}">{{ region.name }}</option>
                                                     {% empty %}
