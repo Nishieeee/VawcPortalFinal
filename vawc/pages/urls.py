@@ -108,6 +108,7 @@ urlpatterns = [
     path('admin-healthcare-vawc/dashboard/', views.healthcare_dashboard_view, name='healthcare dashboard'),
     path('admin-healthcare-vawc/healthcare-dashboard-data/<int:get_year>/', views.healthcare_dashboard_data, name='healthcare dashboard data'),
     path('admin-healthcare-vawc/case/', views.healthcare_case_view, name='healthcare case'),
+    path('admin-healthcare-admin/add_new_case/', views.add_new_case_by_healthcare, name='add new healthcare case'),
     path('admin-healthcare-vawc/settings/', views.healthcare_settings_view, name='healthcare settings'),
     path('refer-healthcare/', views.refer_healthcare, name='refer_healthcare'),
     path('admin-healthcare-vawc/view-healthcare-case/impacted/<int:case_id>/', views.view_healthcare_case_impact, name='healthcare case impacted view'),
