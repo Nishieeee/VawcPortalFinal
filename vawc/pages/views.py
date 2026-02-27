@@ -5289,7 +5289,8 @@ def view_healthcare_case_impact(request, case_id):
                 perpetrator.educational_attainment = encrypt_data(perpetrator.educational_attainment)
                 perpetrator.occupation = encrypt_data(perpetrator.occupation)
                 perpetrator.city = encrypt_data(perpetrator.city)
-                
+        
+                    
 
         # Render the view-case.html template with the case and related objects as context
         
@@ -5338,7 +5339,7 @@ def view_healthcare_case_behalf(request, case_id):
         perpetrators = Perpetrator.objects.filter(case_perpetrator=case)
         status_history = Status_History.objects.filter(case_status_history=case)
         witnesses = Witness.objects.filter(case_witness=case)
-    
+        hospitals = HealthcareAccount.objects.values_list('hospital_name', flat=True).distinct().order_by('hospital_name')
         # Retrieve only the latest status history entry
         latest_status_history = status_history.order_by('-status_date_added').first()
 
@@ -5456,8 +5457,7 @@ def view_healthcare_case_behalf(request, case_id):
         
         region_id = 10 # region 9
         province_id = 50 # zamboanga del sur
-        municipality_id = 1133 # zamboanga city
-
+        municipality_id = 1133 # zamboanga city        
         return render(request, 'healthcare-admin/case/view-case-behalf.html', {
             'case': case,
             'contact_persons': contact_persons,
@@ -5474,6 +5474,9 @@ def view_healthcare_case_behalf(request, case_id):
             ),
             'default_cities': Municipality.objects.filter(province_id=province_id),
             'default_barangays': Barangay.objects.filter(municipality_id=municipality_id),
+            'default_stations': json.dumps(list(PoliceStations.objects.values('name', 'province'))),
+            'default_stations_provinces': PoliceStations.objects.values_list('province', flat=True).distinct(),
+            'hospitals': hospitals,
             'service_information': case.service_information,
             'today': datetime.today(),
         })
