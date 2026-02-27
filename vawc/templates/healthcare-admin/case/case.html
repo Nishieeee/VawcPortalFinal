@@ -237,7 +237,7 @@
             // Send AJAX POST request
             $.ajax({
                 type: 'POST',
-                url: "{% url 'add new healthcare case' %}",  // Replace with your actual URL for adding new case
+                url: "{% url 'add_new_case' %}",  
                 data: formData,
                 success: function(response) {
                     if (response.success) {

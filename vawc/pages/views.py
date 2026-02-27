@@ -2502,8 +2502,13 @@ def add_new_case(request):
         email = request.POST.get('email')
         type_of_case = request.POST.get('case_type')
         service_information = request.POST.get('service_type')
-        barangay = request.POST.get('barangay')
-
+        
+        # case providers
+        barangay = request.POST.get('barangay') or None
+        hospital_name = request.POST.get('hospital_name') or None
+        station = request.POST.get('station') or None
+        swdo = request.POST.get('swdo') or None
+        
         print('barangay encrypted:', encrypt_data(barangay))
         print('barangay decrypted:', barangay)
         case_data = {
@@ -2512,124 +2517,7 @@ def add_new_case(request):
             'date_latest_incident': dummy_text,
             'place_of_incident': dummy_text,
             'street': dummy_text,
-            'barangay': barangay,
-            'province': dummy_text,
-            'city': dummy_text,
-            'region': dummy_text,
-            'description_of_incident': dummy_text,
-            'service_information': service_information,
-            'type_of_case': type_of_case,  # Collecting type of case from the form
-            'date_added': timezone.now()
-        }
-        case_instance = Case.objects.create(**case_data)
-        
-        victim_data = {
-            'first_name': dummy_text,
-            'middle_name': dummy_text,
-            'last_name': dummy_text,
-            'suffix': dummy_text,
-            'sex': dummy_text,
-            'date_of_birth': dummy_text,
-            'civil_status': dummy_text,
-            'nationality': dummy_text,
-            'contact_number': dummy_text,
-            'telephone_number': dummy_text,
-            'house_information': dummy_text,
-            'street': dummy_text,
             'barangay': dummy_text,
-            'province': dummy_text,
-            'city': dummy_text,
-            'educational_attainment': dummy_text,
-            'occupation': dummy_text,
-            'religion': dummy_text,
-            'type_of_disability': dummy_text,
-            'region': dummy_text,
-            'number_of_children': dummy_text,
-            'ages_of_children': dummy_text,
-        }
-        
-        victim_instance = Victim.objects.create(case_victim=case_instance, **victim_data)
-
-        perpetrator_data = {
-            'first_name': dummy_text,
-            'middle_name': dummy_text,
-            'last_name': dummy_text,
-            'suffix': dummy_text,
-            'alias': dummy_text,
-            'sex': dummy_text,
-            'date_of_birth': dummy_text,
-            'nationality': dummy_text,
-            'identifying_marks': dummy_text,
-            'house_information': dummy_text,
-            'street': dummy_text,
-            'barangay': dummy_text,
-            'province': dummy_text,
-            'city': dummy_text,
-            'region': dummy_text,
-            'educational_attainment': dummy_text,
-            'occupation': dummy_text,
-            'type_of_disability': dummy_text,
-            'civil_status': dummy_text,
-            'contact_number': dummy_text,
-            'telephone_number': dummy_text,
-            'religion': dummy_text,
-            'relationship_to_victim': dummy_text,
-        }
-     
-        perpetrator_instance = Perpetrator.objects.create(case_perpetrator=case_instance, **perpetrator_data)
-        
-        if type_of_case == 'Behalf':
-            contact_person_data = {
-                'first_name': dummy_text,
-                'middle_name': dummy_text,
-                'last_name': dummy_text,
-                'suffix': dummy_text,
-                'relationship': dummy_text,
-                'street': dummy_text,
-                'barangay': dummy_text,
-                'city': dummy_text,
-                'province': dummy_text,
-                'contact_number': dummy_text,
-                'telephone_number': dummy_text,
-                'region': dummy_text,
-                'bldg_number': dummy_text,
-            }
-
-            contact_person_instance = Contact_Person.objects.create(case_contact=case_instance, **contact_person_data)
-        else:
-            pass
-
-            # Return the case_id upon successful creation
-        return JsonResponse({'success': True, 'case_id': case_instance.id, 'type_of_case': type_of_case})
-    #         #return redirect('barangay case') 
-    #     except Exception as e:
-    #         # Return error response if creation fails
-    #         return JsonResponse({'success': False, 'error': str(e)})
-    # else:
-    #     return HttpResponse("Method not allowed", status=405)
-    
-def add_new_case_by_healthcare(request):
-    dummy_encrypted = "gAAAAABl-UOp4RWQLPLraFI_q80Ogmfk-Epd8K-CA9zHzYoc1FMwc7tnLv8hTBWTvjlmwjr866FtvBwRZjPXWKBEo3SPvHOU6g=="
-
-    # all dummy_encrypted are replaced with dummy_text
-    # dummy_text = '[data-placeholder]'
-    dummy_text = ''
-    
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        type_of_case = request.POST.get('case_type')
-        service_information = request.POST.get('service_type')
-        hospital_name = request.POST.get('hospital_name')
-
-        print('barangay encrypted:', encrypt_data(hospital_name))
-        print('barangay decrypted:', hospital_name)
-        case_data = {
-            'case_number': get_next_case_number(),
-            'email': email,
-            'date_latest_incident': dummy_text,
-            'place_of_incident': dummy_text,
-            'street': dummy_text,
-            'barangay': '',
             'province': dummy_text,
             'city': dummy_text,
             'region': dummy_text,
@@ -2637,13 +2525,39 @@ def add_new_case_by_healthcare(request):
             'service_information': service_information,
             'type_of_case': type_of_case,  # Collecting type of case from the form
             'date_added': timezone.now(),
-            'refers_to_healthcare_provider': True,
-            'refer_healthcare_date': timezone.now(),
-            'healthcare_provider_name': hospital_name,
-            'provision_of_appropriate_medical_treatment': True,
-            'remarks_to_healthcare': ""
+            # SWDO fields
+            'refers_to_social_welfare': False,
+            'refer_social_date': None,
+            # healthcare fields ( will be blank if no hospital name is provided )
+            'refers_to_healthcare_provider': False,
+            'refer_healthcare_date': None,
+            'healthcare_provider_name': "",
+            # law-enfrocement fields
+            'refers_to_law_enforcement': False,
+            'refer_law_enforcement_date': None,
+            'law_enforcement_agency_name': "",
         }
-
+        
+        if(barangay):
+            case_data['barangay'] = barangay
+        
+        # fill out healthcare fields if hospital_name is provided ( assumes case came from healthcare provider )
+        if(hospital_name):
+            case_data['refers_to_healthcare_provider'] = True
+            case_data['refer_healthcare_date'] = timezone.now()
+            case_data['healthcare_provider_name'] = hospital_name
+        
+        # fill out station fields if station is provided ( assumes case came from law_enforcement provider)
+        if(station):
+            case_data['refers_to_law_enforcement'] = True
+            case_data['refer_law_enforcement_date'] = timezone.now()
+            case_data['law_enforcement_agency_name'] = station
+        
+        # fill out swdo fields if swdo name is provided ( assumes case came from swdo provider )
+        if(swdo):
+            case_data['refers_to_social_welfare'] = True
+            case_data['refer_social_date'] = timezone.now()
+            
         case_instance = Case.objects.create(**case_data)
         
         victim_data = {
@@ -2731,128 +2645,6 @@ def add_new_case_by_healthcare(request):
     # else:
     #     return HttpResponse("Method not allowed", status=405)
     
-def add_new_case_by_law_enforcement(request):
-    dummy_encrypted = "gAAAAABl-UOp4RWQLPLraFI_q80Ogmfk-Epd8K-CA9zHzYoc1FMwc7tnLv8hTBWTvjlmwjr866FtvBwRZjPXWKBEo3SPvHOU6g=="
-
-    # all dummy_encrypted are replaced with dummy_text
-    # dummy_text = '[data-placeholder]'
-    dummy_text = ''
-    
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        type_of_case = request.POST.get('case_type')
-        service_information = request.POST.get('service_type')
-        station = request.POST.get('station')
-
-        print('barangay encrypted:', encrypt_data(station))
-        print('barangay decrypted:', station)
-        case_data = {
-            'case_number': get_next_case_number(),
-            'email': email,
-            'date_latest_incident': dummy_text,
-            'place_of_incident': dummy_text,
-            'street': dummy_text,
-            'barangay': station,
-            'province': dummy_text,
-            'city': dummy_text,
-            'region': dummy_text,
-            'description_of_incident': dummy_text,
-            'service_information': service_information,
-            'type_of_case': type_of_case,  # Collecting type of case from the form
-            'date_added': timezone.now(),
-            'refers_to_law_enforcement': True,
-            'refer_law_enforcement_date': timezone.now(),
-            'law_enforcement_agency_name': station,
-            'remarks_to_law_enforcement': '',
-            'service_information': ''
-        }
-        case_instance = Case.objects.create(**case_data)
-        
-        victim_data = {
-            'first_name': dummy_text,
-            'middle_name': dummy_text,
-            'last_name': dummy_text,
-            'suffix': dummy_text,
-            'sex': dummy_text,
-            'date_of_birth': dummy_text,
-            'civil_status': dummy_text,
-            'nationality': dummy_text,
-            'contact_number': dummy_text,
-            'telephone_number': dummy_text,
-            'house_information': dummy_text,
-            'street': dummy_text,
-            'barangay': dummy_text,
-            'province': dummy_text,
-            'city': dummy_text,
-            'educational_attainment': dummy_text,
-            'occupation': dummy_text,
-            'religion': dummy_text,
-            'type_of_disability': dummy_text,
-            'region': dummy_text,
-            'number_of_children': dummy_text,
-            'ages_of_children': dummy_text,
-        }
-        
-        victim_instance = Victim.objects.create(case_victim=case_instance, **victim_data)
-
-        perpetrator_data = {
-            'first_name': dummy_text,
-            'middle_name': dummy_text,
-            'last_name': dummy_text,
-            'suffix': dummy_text,
-            'alias': dummy_text,
-            'sex': dummy_text,
-            'date_of_birth': dummy_text,
-            'nationality': dummy_text,
-            'identifying_marks': dummy_text,
-            'house_information': dummy_text,
-            'street': dummy_text,
-            'barangay': dummy_text,
-            'province': dummy_text,
-            'city': dummy_text,
-            'region': dummy_text,
-            'educational_attainment': dummy_text,
-            'occupation': dummy_text,
-            'type_of_disability': dummy_text,
-            'civil_status': dummy_text,
-            'contact_number': dummy_text,
-            'telephone_number': dummy_text,
-            'religion': dummy_text,
-            'relationship_to_victim': dummy_text,
-        }
-     
-        perpetrator_instance = Perpetrator.objects.create(case_perpetrator=case_instance, **perpetrator_data)
-        
-        if type_of_case == 'Behalf':
-            contact_person_data = {
-                'first_name': dummy_text,
-                'middle_name': dummy_text,
-                'last_name': dummy_text,
-                'suffix': dummy_text,
-                'relationship': dummy_text,
-                'street': dummy_text,
-                'barangay': dummy_text,
-                'city': dummy_text,
-                'province': dummy_text,
-                'contact_number': dummy_text,
-                'telephone_number': dummy_text,
-                'region': dummy_text,
-                'bldg_number': dummy_text,
-            }
-
-            contact_person_instance = Contact_Person.objects.create(case_contact=case_instance, **contact_person_data)
-        else:
-            pass
-
-            # Return the case_id upon successful creation
-        return JsonResponse({'success': True, 'case_id': case_instance.id, 'type_of_case': type_of_case})
-    #         #return redirect('barangay case') 
-    #     except Exception as e:
-    #         # Return error response if creation fails
-    #         return JsonResponse({'success': False, 'error': str(e)})
-    # else:
-    #     return HttpResponse("Method not allowed", status=405)
-
 @login_required
 def view_admin_case_behalf(request, case_id):
     if request.user.account.type != 'admin':
